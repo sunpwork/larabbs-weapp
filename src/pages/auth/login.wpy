@@ -66,7 +66,7 @@ export default class Login extends wepy.page {
     },
     // 绑定密码 input 变化
     bindPasswordInput(e) {
-      this.password = e.detail.password
+      this.password = e.detail.value
     },
     // 表单提交
     async submit() {
