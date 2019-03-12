@@ -1,57 +1,56 @@
 <style lang="less">
-@import 'style/weui.less';
-page{
-  background-color: #F8F8F8;
-  font-size: 16px;
-}
-.page__hd {
-  padding: 40px;
-}
-.page__bd {
-  padding-bottom: 40px;
-}
-.page__bd_spacing {
-  padding-left: 15px;
-  padding-right: 15px;
-}
-.page__ft{
-  padding-bottom: 10px;
-  text-align: center;
-}
-.page__title {
-  text-align: left;
-  font-size: 20px;
-  font-weight: 400;
-}
-.page__desc {
-  margin-top: 5px;
-  color: #888888;
-  text-align: left;
-  font-size: 14px;
-}
+  @import 'style/weui.less';
+  page {
+    background-color: #F8F8F8;
+    font-size: 16px;
+  }
+  .page__hd {
+    padding: 40px;
+  }
+  .page__bd {
+    padding-bottom: 40px;
+  }
+  .page__bd_spacing {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .page__ft {
+    padding-bottom: 10px;
+    text-align: center;
+  }
+  .page__title {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 400;
+  }
+  .page__desc {
+    margin-top: 5px;
+    color: #888888;
+    text-align: left;
+    font-size: 14px;
+  }
 </style>
 
 <script>
-import wepy from 'wepy'
-import 'wepy-async-function'
-
-export default class extends wepy.app {
-  config = {
-    pages: [
-      'pages/index',
-      'pages/user',
-      'pages/auth/login',
-      'pages/auth/register'
-    ],
-    window: {
-      backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'Larabbs',
-      navigationBarTextStyle: 'black'
-    },
-    tabBar: {
-      list: [
-        {
+  import wepy from 'wepy'
+  import 'wepy-async-function'
+  import api from '@/utils/api'
+  export default class extends wepy.app {
+    config = {
+      pages: [
+        'pages/index',
+        'pages/user',
+        'pages/auth/login',
+        'pages/auth/register'
+      ],
+      window: {
+        backgroundTextStyle: 'light',
+        navigationBarBackgroundColor: '#fff',
+        navigationBarTitleText: 'Larabbs',
+        navigationBarTextStyle: 'black'
+      },
+      tabBar: {
+        list: [{
           pagePath: 'pages/index',
           text: '首页',
           iconPath: 'images/index.png',
@@ -63,22 +62,47 @@ export default class extends wepy.app {
           iconPath: 'images/user.png',
           selectedIconPath: 'images/user_selected.png'
         }
-      ],
-      color: '#707070',
-      selectedColor: '#00b5ad'
+        ],
+        color: '#707070',
+        selectedColor: '#00b5ad'
+      }
+    }
+    constructor() {
+      super()
+      this.use('requestfix')
+      this.use('promisify')
+    }
+    onLaunch() {
+      // wepy.login().then(res => {
+      //   console.log('login:', res)
+      // })
+    }
+    async getCurrentUser() {
+      if (!this.checkLogin()) {
+        return null
+      }
+      let user = wepy.getStorageSync('user')
+      if (!user) {
+        try {
+          let userResponse = await api.authRequest('user')
+          // 请求成功
+          if (userResponse.statusCode === 200) {
+            user = userResponse.data
+            wepy.setStorageSync('user', user)
+          }
+        } catch (err) {
+          console.log(err)
+          wepy.showModal({
+            title: '提示',
+            content: '服务器错误，请联系管理员'
+          })
+        }
+      }
+      return user
+    }
+    // 用户是否已经登录
+    checkLogin() {
+      return (wepy.getStorageSync('access_token') !== '')
     }
   }
-
-  constructor () {
-    super()
-    this.use('requestfix')
-    this.use('promisify')
-  }
-
-  onLaunch() {
-    // wepy.login().then(res => {
-    //   console.log('login:', res)
-    // })
-  }
-}
 </script>
