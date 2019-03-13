@@ -6,7 +6,7 @@
 <script>
     import wepy from 'wepy'
     import topicList from '@/components/topicList'
-export default class UserIndex extends wepy.page {
+    export default class UserIndex extends wepy.page {
       config = {
         navigationBarTitleText: 'Ta 发布的话题',
         enablePullDownRefresh: true
@@ -24,6 +24,11 @@ export default class UserIndex extends wepy.page {
         this.$apply()
             // 调用组件 reload 方法
         this.$invoke('topiclist', 'reload')
+      }
+      onShow() {
+        this.$parent.checkRefreshPages(this.getCurrentPages().pop().route, () => {
+          this.$invoke('topiclist', 'reload')
+        })
       }
         // 下拉刷新
       async onPullDownRefresh() {
